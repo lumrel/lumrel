@@ -13,18 +13,16 @@ permissions:
   contents: read
 
 jobs:
-  ci:
-    name: Rust CI
+  check:
+    name: Cargo check
     runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@1.98.1
-        with:
-          components: rustfmt, clippy
 
       - name: Cache Rust dependencies
         uses: Swatinem/rust-cache@v2
@@ -32,11 +30,69 @@ jobs:
       - name: Check
         run: cargo check --workspace
 
+  test:
+    name: Cargo test
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@1.98.1
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+
       - name: Test
         run: cargo test --workspace
+
+  fmt:
+    name: Cargo fmt
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@1.98.1
+        with:
+          components: rustfmt
 
       - name: Format
         run: cargo fmt --all -- --check
 
+  clippy:
+    name: Cargo clippy
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@1.98.1
+        with:
+          components: clippy
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+
       - name: Clippy
         run: cargo clippy --workspace --all-targets -- -D warnings
+
+  deny:
+    name: Dependency audit
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Audit dependencies
+        uses: EmbarkStudios/cargo-deny-action@v2.1.1
+        with:
+          rust-version: "1.98.1"
+          command: check
+          arguments: --all-features
