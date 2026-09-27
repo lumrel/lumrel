@@ -1,0 +1,38 @@
+{
+  "name": "Lumrel",
+
+  "image": "mcr.microsoft.com/devcontainers/rust:1-bookworm",
+
+  "remoteUser": "vscode",
+
+  "postCreateCommand": "rustup component add rustfmt clippy rust-src",
+
+  "containerEnv": {
+    "RUST_BACKTRACE": "1",
+    "CARGO_TERM_COLOR": "always"
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "rust-lang.rust-analyzer",
+        "tamasfe.even-better-toml",
+        "vadimcn.vscode-lldb",
+        "redhat.vscode-yaml"
+      ],
+
+      "settings": {
+        "editor.formatOnSave": true,
+
+        "[rust]": {
+          "editor.defaultFormatter": "rust-lang.rust-analyzer"
+        },
+
+        "rust-analyzer.check.command": "clippy",
+
+        "files.trimTrailingWhitespace": true,
+        "files.insertFinalNewline": true
+      }
+    }
+  }
+}
