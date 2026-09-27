@@ -2,156 +2,190 @@
 
 Thank you for your interest in contributing to Lumrel.
 
-Lumrel aims to become a reliable collection of reusable backend components for Rust. Contributions of code, documentation, tests, architecture improvements, bug reports, and constructive technical discussion are welcome.
+Lumrel is designed as a production-oriented ecosystem of reusable Rust backend components.
 
-Because many Lumrel components may eventually be used in security-sensitive production systems, correctness, maintainability, and reviewability are prioritized over implementation speed.
+Correctness, security, maintainability, explicit architecture, and long-term compatibility are prioritized over implementation speed.
 
-## Before Contributing
+## Read the Architecture First
 
-For small bug fixes, documentation improvements, and tests, feel free to open a pull request directly.
+Before making architectural or public API changes, read:
 
-For significant changes, new crates, major abstractions, public API redesigns, or architectural changes, please open a discussion or issue first.
+- `README.md`
+- `ARCHITECTURE.md`
+- `AGENTS.md`
 
-This helps avoid spending time implementing an approach that conflicts with the project's architecture.
+`AGENTS.md` contains detailed implementation rules that apply equally to human and AI-assisted contributions.
 
-## Core Principles
+## Development Environment
 
-Contributions should preserve the main Lumrel design principles:
+Lumrel provides a Dev Container.
 
-- framework-agnostic core logic
-- explicit adapters
-- loose coupling between crates
-- coherent APIs
-- secure defaults
-- replaceable implementations
-- clear ownership of responsibilities
-- minimal unnecessary dependencies
-- predictable behavior
-- strong automated testing
+Using it is recommended because it provides the same Rust development environment expected by the project.
 
-## Crate Boundaries
+Open the repository and select:
 
-Each crate should have a clear and narrow responsibility.
+```text
+Dev Containers: Reopen in Container
+```
 
-A crate should not depend on unrelated Lumrel modules merely for convenience.
+The development toolchain is pinned through:
 
-For example, an email crate should not require the authentication crate unless the dependency is fundamental to its responsibility.
+```text
+rust-toolchain.toml
+```
 
-Shared abstractions should only be extracted when multiple crates genuinely need them.
+## Workspace Structure
 
-Avoid creating generic "common" modules that accumulate unrelated functionality.
+Crates are grouped by domain:
 
-## Core vs. Adapters
-
-Framework-specific, database-specific, and provider-specific behavior should normally live outside core crates.
+```text
+crates/<domain>/<component>
+```
 
 For example:
 
 ```text
-lumrel-auth
-    Framework-independent authentication concepts
-
-lumrel-axum
-    Axum-specific integration
-
-lumrel-sqlx
-    SQLx-specific integration
+crates/auth/core
 ```
 
-Exact crate names may evolve, but the separation principle should remain.
+is published as:
+
+```text
+lumrel-auth
+```
+
+Do not create unrelated crates at the repository root.
+
+## Before Implementing a Large Change
+
+For:
+
+- new domains
+- new authentication mechanisms
+- public API redesigns
+- new adapters
+- architectural changes
+- new shared abstractions
+
+open a discussion or issue before investing in a large implementation.
+
+Small fixes, tests, and documentation improvements may generally go directly through a pull request.
+
+## Architectural Principles
+
+Contributions should preserve:
+
+- framework-agnostic core crates
+- explicit infrastructure adapters
+- clear domain ownership
+- small crate responsibilities
+- secure defaults
+- type-safe APIs
+- private invariants
+- minimal mandatory dependencies
+- predictable failure behavior
+
+## Core vs Infrastructure
+
+A core crate should not depend directly on:
+
+- Axum
+- Actix Web
+- SQLx
+- Diesel
+- PostgreSQL
+- Redis
+- cloud provider SDKs
+- mail providers
+
+Such integrations belong in adapter crates.
+
+## Avoid Premature Abstractions
+
+Do not introduce generic repositories, utility crates, or common traits merely because two implementations look superficially similar.
+
+Prefer abstractions extracted from demonstrated repetition.
+
+In particular, authentication mechanisms should normally define their own credential storage contracts.
 
 ## Public APIs
 
-Public APIs require additional care because changes may affect downstream applications.
+Public APIs should:
 
-When introducing a public API:
-
-- keep it as small as practical
-- avoid exposing implementation details
-- prefer explicit types over loosely structured values
-- document security-relevant behavior
-- consider future extensibility
+- remain as small as practical
+- avoid exposing internal representation
+- use validated constructors
+- keep struct fields private
+- document invariants
 - avoid unnecessary generic complexity
-- avoid locking users into a specific framework or provider
+- remain extensible without forcing unrelated consumers to change
 
-Breaking changes should be deliberate and documented.
+Public enums that are expected to grow should normally be `#[non_exhaustive]`.
 
-## Security-Sensitive Code
+## Core Value Types
 
-Changes affecting areas such as the following require additional scrutiny:
+Invalid states should be difficult or impossible to construct.
 
-- authentication
-- authorization
-- sessions
-- tokens
-- cryptography
-- password handling
-- secrets
-- rate limiting
-- input validation
-- database authorization boundaries
+Do not add alternate constructors that bypass validation.
 
-Security-sensitive code should include tests covering both expected behavior and failure cases.
+Conversion implementations and serde deserialization must reuse the same invariants.
 
-Do not introduce custom cryptographic algorithms.
+## Serde Compatibility
 
-Use established, reviewed cryptographic libraries and protocols.
+Serde support is optional.
+
+When a serialized representation has been published, treat it as part of the public API.
+
+Do not casually change:
+
+- field names
+- enum names
+- tagging schemes
+- timestamp representation
+- newtype representation
+
+Incompatible changes require deliberate versioning decisions.
 
 ## Dependencies
 
-New dependencies should provide clear value.
+New dependencies require justification.
 
-Before adding a dependency, consider:
+Before adding one, consider:
 
-- maintenance status
+- maintenance
 - security history
-- API stability
-- transitive dependency cost
+- license
+- transitive dependencies
+- MSRV impact
 - compile-time impact
-- feature requirements
-- whether the functionality is small enough to implement safely without it
+- whether the dependency belongs in an adapter
+- whether the functionality can remain dependency-free
 
-Avoid adding large dependency trees for minor conveniences.
+Core crates should remain particularly conservative.
 
-## Feature Flags
+## Security-Sensitive Code
 
-Optional integrations should use Cargo feature flags where appropriate.
+Authentication, authorization, tokens, sessions, secrets, credentials, and cryptographic code require additional scrutiny.
 
-Features should:
+Do not:
 
-- have clear names
-- avoid surprising behavior
-- remain additive where possible
-- avoid silently changing security behavior
+- invent cryptographic algorithms
+- log secrets
+- expose credentials through `Debug`
+- serialize secrets unnecessarily
+- distinguish sensitive external authentication errors in ways that enable account enumeration
 
-Default features should remain conservative.
+## Unsafe Rust
 
-## Tests
+Core authentication code uses:
 
-New functionality should normally include tests.
-
-Depending on the change, this may include:
-
-- unit tests
-- integration tests
-- compile tests
-- property tests
-- regression tests
-- failure-path tests
-
-Bug fixes should include a regression test whenever practical.
-
-Run:
-
-```bash
-cargo test --workspace
+```rust
+#![forbid(unsafe_code)]
 ```
 
-before submitting a pull request.
+Do not introduce unsafe Rust into a core crate.
 
 ## Formatting
-
-Code must be formatted with `rustfmt`.
 
 Run:
 
@@ -159,63 +193,116 @@ Run:
 cargo fmt --all -- --check
 ```
 
-To automatically format the workspace:
+To automatically format:
 
 ```bash
 cargo fmt --all
 ```
 
-## Linting
-
-The workspace should remain clean under Clippy.
+## Compilation
 
 Run:
 
 ```bash
-cargo clippy --workspace --all-targets --all-features -- -D warnings
+cargo check --workspace
 ```
 
-Avoid suppressing Clippy warnings without a clear reason.
+## Tests
 
-When suppression is necessary, keep it narrowly scoped and document why.
+Run:
+
+```bash
+cargo test --workspace
+```
+
+New functionality should include tests.
+
+Tests should cover invariants and failure paths, not only happy paths.
+
+Bug fixes should include regression coverage whenever practical.
+
+## Clippy
+
+Run:
+
+```bash
+cargo clippy --workspace --all-targets -- -D warnings
+```
+
+Do not suppress warnings without a documented reason.
+
+## Dependency Audit
+
+Run:
+
+```bash
+cargo deny check
+```
+
+Do not weaken `deny.toml` merely to allow a dependency without justification.
+
+## Required Local Checks
+
+Before opening a pull request, the following should all pass:
+
+```bash
+cargo check --workspace
+cargo test --workspace
+cargo fmt --all -- --check
+cargo clippy --workspace --all-targets -- -D warnings
+cargo deny check
+```
+
+## Continuous Integration
+
+GitHub Actions runs these categories independently and in parallel:
+
+```text
+Cargo check
+Cargo test
+Cargo fmt
+Cargo clippy
+Dependency audit
+```
+
+Pull requests should remain green before merge.
 
 ## Documentation
 
-Public items should be documented when their purpose or behavior is not immediately obvious.
+Public APIs should include useful Rustdoc.
 
-Documentation should explain:
+Documentation should describe:
 
-- what the API does
-- important invariants
-- failure behavior
+- semantics
+- invariants
+- errors
 - security implications
-- examples when useful
+- examples where useful
 
-Avoid documentation that merely repeats an identifier's name.
-
-## Error Handling
-
-Libraries should return structured errors rather than panic during normal failure conditions.
-
-Panics should be reserved for situations involving violated internal invariants or conditions that cannot be handled meaningfully.
-
-Security-sensitive errors should avoid exposing secrets or unnecessary internal details.
+Update Markdown documentation when changing architecture or compatibility guarantees.
 
 ## Commits
 
-Keep commits focused and understandable.
+Use clear conventional commit messages when practical.
 
-Prefer commits that represent one logical change.
+Examples:
 
-Commit messages should explain the intent of the change rather than merely describing modified files.
+```text
+feat(auth): add principal identifier
+feat(auth): add authentication outcomes
+fix(auth): reject duplicate methods
+test(auth): cover invalid serde input
+docs: document authentication invariants
+ci: split Rust checks into parallel jobs
+```
+
+Keep commits focused.
 
 ## Developer Certificate of Origin
 
-Lumrel uses the Developer Certificate of Origin, version 1.1.
+Lumrel uses the Developer Certificate of Origin 1.1.
 
-By contributing, you certify that you have the right to submit the contribution under the project's license.
-
-Commits must include a `Signed-off-by` line:
+Commits must include a sign-off:
 
 ```text
 Signed-off-by: Your Name <your-email@example.com>
@@ -227,64 +314,52 @@ Git can add this automatically:
 git commit -s
 ```
 
-Use your real identity or another identity that you are legally permitted to use for the contribution.
-
-A pull request containing commits without the required sign-off may need to be corrected before it can be merged.
+By contributing, you certify that you have the right to submit the contribution under the project's license.
 
 ## Pull Requests
 
-A good pull request should:
+A pull request should explain:
 
-- explain the problem being solved
-- describe the chosen approach
-- mention important design decisions
-- include appropriate tests
-- update documentation when necessary
-- avoid unrelated changes
-- pass formatting, tests, and linting
+- the problem
+- the approach
+- important design decisions
+- compatibility implications
+- security implications when relevant
+- tests added or changed
 
-Large pull requests may be easier to review when divided into smaller logical changes.
+Avoid unrelated refactors in the same pull request.
 
-## Breaking Changes
-
-Breaking changes should include:
-
-- a clear explanation of what changed
-- the reason for the change
-- migration guidance when appropriate
-- relevant documentation updates
-
-Once crates reach stable versions, Lumrel will follow semantic versioning.
-
-## AI-Generated Contributions
+## AI-Assisted Contributions
 
 AI-assisted development is allowed.
 
-Contributors remain fully responsible for code they submit.
+The contributor remains responsible for all submitted code.
 
-Before contributing AI-assisted code, verify:
+Before submitting AI-assisted work, verify:
 
 - correctness
-- licensing compatibility
-- security properties
+- architecture compliance
+- licensing
+- security
 - tests
+- dependency choices
 - documentation
-- absence of fabricated APIs or assumptions
+- API existence
 
-Do not submit generated code you do not understand or cannot maintain.
+Do not submit generated code you do not understand.
 
-## Reporting Security Issues
+Coding agents should follow `AGENTS.md`.
 
-Do not report vulnerabilities through normal public issues.
+## Security Reports
 
-Follow [SECURITY.md](SECURITY.md).
+Do not disclose security vulnerabilities through normal public issues.
 
-## Community Conduct
+See `SECURITY.md`.
 
-All contributors must follow [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+## Conduct
+
+All contributors must follow `CODE_OF_CONDUCT.md`.
 
 ## License
 
-By contributing to Lumrel, you agree that your contributions will be licensed under the same license that applies to the relevant Lumrel source code.
-
-Unless explicitly stated otherwise, this is the MIT License.
+Unless explicitly stated otherwise, contributions are accepted under the MIT License.

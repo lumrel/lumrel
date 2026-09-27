@@ -2,232 +2,471 @@
 
 **Composable backend building blocks for Rust.**
 
-Lumrel is an open-source collection of reusable Rust crates for building backend applications without repeatedly implementing the same foundational infrastructure.
+Lumrel is an open-source ecosystem of reusable Rust crates for building backend applications without repeatedly implementing the same foundational infrastructure.
 
-The project provides independent but coherent modules for common backend concerns such as authentication, users, permissions, sessions, JWTs, email, rate limiting, configuration, logging, and database integration.
+The project is designed around a small set of principles:
 
-Lumrel is designed around a simple idea:
+> Framework-agnostic cores. Explicit adapters. Strong domain boundaries. Secure defaults. Production-oriented design.
 
-> Backend infrastructure should be reusable, composable, framework-agnostic, and secure by default.
+Lumrel is not a monolithic backend framework.
+
+Applications should be able to adopt individual components without committing to the entire ecosystem.
 
 ## Status
 
-Lumrel is currently under active development.
+Lumrel is currently in early active development.
 
-The project is being designed with production use in mind, but APIs may change while the initial architecture stabilizes.
+The architecture is being designed for production use from the beginning, but public APIs may still change while the initial `0.x` crates are established.
 
-Do not assume semantic-versioning compatibility guarantees before individual crates reach stable releases.
+Do not assume API stability until individual crates document their stability guarantees.
 
 ## Goals
 
 Lumrel aims to provide:
 
-- A coherent architecture across all crates.
-- Framework-agnostic core functionality.
-- Explicit adapters for frameworks, databases, and external services.
-- Strong security defaults.
-- Flexible abstractions without unnecessary coupling.
-- Predictable and consistent APIs.
-- Clear error handling.
-- Thorough automated testing.
-- Production-oriented design.
-- Independent crates that can be adopted incrementally.
+- reusable backend primitives
+- coherent APIs across crates
+- framework-independent domain logic
+- explicit infrastructure adapters
+- strong type safety
+- secure defaults
+- small mandatory dependency graphs
+- predictable error handling
+- thorough automated testing
+- stable serialization contracts
+- incremental adoption
+- clear domain ownership
 
-Lumrel does **not** aim to become a monolithic backend framework.
+## Repository
 
-Applications should be able to use only the components they need.
+Lumrel is maintained as a Cargo virtual workspace.
+
+The repository is organized by domain rather than as one flat list of crates.
+
+```text
+lumrel/
+├── .devcontainer/
+│   └── devcontainer.json
+│
+├── .github/
+│   └── workflows/
+│       └── ci.yml
+│
+├── crates/
+│   ├── auth/
+│   │   ├── core/
+│   │   ├── password/
+│   │   ├── passkey/
+│   │   ├── api-key/
+│   │   └── ...
+│   │
+│   ├── mail/
+│   │   └── ...
+│   │
+│   ├── sessions/
+│   │   └── ...
+│   │
+│   └── tokens/
+│       └── ...
+│
+├── Cargo.toml
+├── Cargo.lock
+├── rust-toolchain.toml
+├── deny.toml
+├── AGENTS.md
+├── ARCHITECTURE.md
+├── CONTRIBUTING.md
+├── SECURITY.md
+├── CODE_OF_CONDUCT.md
+├── TRADEMARKS.md
+├── LICENSE
+└── README.md
+```
+
+Physical directory names and published crate names are intentionally separate.
+
+For example:
+
+```text
+crates/auth/core
+```
+
+contains the package:
+
+```text
+lumrel-auth
+```
 
 ## Architecture
 
-Lumrel follows a layered architecture.
-
-Core crates should remain independent from specific web frameworks, database implementations, email providers, or infrastructure vendors whenever practical.
-
-Framework-specific and provider-specific behavior belongs in adapters.
+Lumrel separates domain behavior from infrastructure.
 
 Conceptually:
 
 ```text
 Application
     │
-    ├── Framework adapters
-    │
-    ├── Provider adapters
-    │
-    ▼
-Lumrel crates
+    ├── HTTP / framework adapters
+    ├── database adapters
+    ├── provider adapters
     │
     ▼
-Framework-agnostic domain abstractions
+Mechanism crates
+    │
+    ▼
+Framework-agnostic core crates
 ```
 
-This separation allows applications to replace infrastructure without rewriting their core business logic.
+Core crates must not depend on infrastructure adapters.
 
-## Planned Crates
+See [ARCHITECTURE.md](ARCHITECTURE.md) for the detailed architecture.
 
-The exact crate structure may evolve, but the initial ecosystem is expected to include modules such as:
+## Authentication
+
+The first Lumrel domain under development is authentication.
+
+The core package is:
 
 ```text
 lumrel-auth
-lumrel-users
-lumrel-permissions
-lumrel-session
-lumrel-jwt
-lumrel-mail
-lumrel-rate-limit
-lumrel-config
-lumrel-logging
-lumrel-db
 ```
 
-Additional adapter crates may provide integrations such as:
+located at:
 
 ```text
-lumrel-axum
-lumrel-sqlx
-lumrel-postgres
+crates/auth/core
 ```
 
-Names and boundaries may change as the architecture develops.
+`lumrel-auth` defines authentication domain concepts only.
 
-## Design Principles
+It does not implement:
 
-### Framework agnostic
+- passwords
+- passkeys
+- API keys
+- magic links
+- OAuth providers
+- databases
+- sessions
+- HTTP frameworks
 
-Core functionality should not depend on Axum, Actix Web, Rocket, or any other HTTP framework unless the dependency belongs to an explicitly framework-specific adapter.
+Specific mechanisms belong in separate crates such as:
 
-### Composable
+```text
+lumrel-auth-password
+lumrel-auth-passkey
+lumrel-auth-api-key
+lumrel-auth-magic-link
+```
 
-Each crate should be useful independently.
+## Users and Authentication Are Separate
 
-Using `lumrel-mail` should not require adopting Lumrel authentication, database abstractions, or unrelated components.
+Lumrel intentionally treats users and authentication as different domains.
 
-### Coherent
+A future users domain may own concepts such as:
 
-Independent does not mean inconsistent.
+- user lifecycle
+- profiles
+- display names
+- preferences
+- account state
 
-Lumrel crates should share common design conventions for:
+Authentication does not own those concepts.
 
-- errors
-- traits
-- configuration
-- naming
-- testing
-- feature flags
-- async behavior
-- observability
-
-### Flexible
-
-Lumrel provides abstractions and sensible defaults while allowing applications to replace implementations where appropriate.
-
-The project should avoid unnecessary assumptions about application architecture.
-
-### Security conscious
-
-Security-sensitive components must favor safe behavior over convenience.
-
-Security-related changes should receive additional scrutiny, tests, and documentation.
-
-### Explicit
-
-Important behavior should be visible in APIs and configuration.
-
-Lumrel should avoid surprising implicit behavior, hidden global state, and security-sensitive magic.
-
-## Example
-
-A future application might combine several Lumrel modules while choosing its own HTTP framework and infrastructure:
+`lumrel-auth` refers to an authenticated entity through:
 
 ```rust
-use lumrel_auth::AuthService;
-use lumrel_mail::Mailer;
-use lumrel_permissions::PermissionService;
+PrincipalId
+```
 
-async fn example() {
-    // Application-specific adapters and configuration
-    // can be provided independently.
+This keeps authentication reusable without depending on a particular user model.
+
+## Authentication Model
+
+The planned `lumrel-auth` domain model includes:
+
+```text
+PrincipalId
+AuthenticationMethodId
+AuthenticationAssurance
+AuthenticationMethods
+AuthenticationAssurances
+AuthenticatedPrincipal
+AuthenticationFailure
+AuthenticationOutcome
+Authenticator
+```
+
+Authentication supports multiple mechanisms and multi-factor flows without requiring the core to know every possible mechanism.
+
+An authenticated principal contains:
+
+```text
+principal identity
+authentication methods
+authentication assurances
+authentication timestamp
+```
+
+## Authentication Methods
+
+Authentication methods are extensible identifiers.
+
+Examples include:
+
+```text
+password
+passkey
+api-key
+magic-link
+totp
+recovery-code
+```
+
+Provider-specific method identifiers can be defined outside the core.
+
+For example:
+
+```text
+oauth:github
+```
+
+does not require a change to `lumrel-auth`.
+
+## Authentication Assurances
+
+Assurances describe properties established by an authentication event.
+
+Examples may include:
+
+```text
+single-factor
+multi-factor
+phishing-resistant
+```
+
+A principal may have multiple assurances simultaneously.
+
+Lumrel does not define a global strength ordering between assurance values.
+
+Applications decide which assurances satisfy their own security policies.
+
+## Authentication Result
+
+Successful authentication produces an immutable:
+
+```rust
+AuthenticatedPrincipal
+```
+
+Expected authentication rejection is represented separately from operational failure.
+
+Conceptually:
+
+```rust
+Result<AuthenticationOutcome, AuthenticatorError>
+```
+
+where:
+
+```rust
+AuthenticationOutcome::Authenticated(...)
+```
+
+represents success and:
+
+```rust
+AuthenticationOutcome::Rejected(...)
+```
+
+represents valid execution with rejected credentials.
+
+An unavailable database or external provider is an operational error, not a credential rejection.
+
+## Step-Up Authentication
+
+Lumrel distinguishes between:
+
+```text
+step-up authentication
+```
+
+and:
+
+```text
+reauthentication
+```
+
+A step-up adds a new authentication factor and merges new assurance properties.
+
+A reauthentication keeps the existing authentication methods but replaces the assurance set with the guarantees established by the new authentication event.
+
+Both produce a new immutable `AuthenticatedPrincipal`.
+
+## Framework Agnostic
+
+The authentication core must not depend on Axum or any other web framework.
+
+A future Axum integration belongs in an adapter crate.
+
+The same rule applies to:
+
+- PostgreSQL
+- SQLx
+- Redis
+- SMTP
+- external identity providers
+
+## Dependencies
+
+Core Lumrel crates are designed to keep mandatory dependency graphs small.
+
+`lumrel-auth` is intended to have:
+
+```text
+zero mandatory external dependencies
+```
+
+by default.
+
+Optional capabilities may use Cargo features.
+
+For example, serde support is optional.
+
+## Serde
+
+Where supported, serialization is enabled explicitly:
+
+```toml
+lumrel-auth = {
+    version = "0.1",
+    features = ["serde"],
 }
 ```
 
-The public APIs shown in documentation during early development may change.
+The default feature set remains empty.
 
-## Workspace
+Lumrel treats published serde representations as part of the public compatibility contract.
 
-Lumrel is maintained as a Cargo workspace containing multiple crates.
+Deserialization must preserve all domain invariants.
 
-A typical repository layout is:
+Invalid serialized input must not be capable of constructing invalid Lumrel values.
+
+## Rust
+
+Lumrel uses:
 
 ```text
-lumrel/
-├── crates/
-│   ├── lumrel-auth/
-│   ├── lumrel-users/
-│   ├── lumrel-permissions/
-│   ├── lumrel-session/
-│   ├── lumrel-jwt/
-│   ├── lumrel-mail/
-│   ├── lumrel-rate-limit/
-│   ├── lumrel-config/
-│   ├── lumrel-logging/
-│   └── lumrel-db/
-├── examples/
-├── docs/
-├── CONTRIBUTING.md
-├── CODE_OF_CONDUCT.md
-├── SECURITY.md
-├── TRADEMARKS.md
-├── LICENSE
-└── README.md
+Rust Edition 2024
 ```
+
+The current MSRV is:
+
+```text
+Rust 1.85
+```
+
+The development and CI toolchain is pinned independently in:
+
+```text
+rust-toolchain.toml
+```
+
+## Dev Container
+
+Lumrel provides a Dev Container for reproducible development.
+
+Open the repository in a compatible editor and select:
+
+```text
+Dev Containers: Reopen in Container
+```
+
+The container provides the Rust toolchain and project-specific editor extensions.
+
+This allows contributors to work on Lumrel without installing the full Rust development environment directly on their host system.
 
 ## Development
 
-The minimum supported Rust version will be documented once the initial compatibility policy is established.
-
-Typical development commands will include:
+Run:
 
 ```bash
-cargo build --workspace
+cargo check --workspace
 cargo test --workspace
 cargo fmt --all -- --check
-cargo clippy --workspace --all-targets --all-features -- -D warnings
+cargo clippy --workspace --all-targets -- -D warnings
+cargo deny check
 ```
 
-Contributors should run the relevant checks before submitting changes.
+before submitting changes.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the complete contribution guidelines.
+## Continuous Integration
+
+GitHub Actions runs independent checks in parallel:
+
+```text
+Cargo check
+Cargo test
+Cargo fmt
+Cargo clippy
+Dependency audit
+```
+
+The dependency audit uses `cargo-deny`.
+
+## Dependency Security
+
+Lumrel uses:
+
+```text
+deny.toml
+```
+
+to enforce dependency policy.
+
+Checks include:
+
+- known security advisories
+- yanked dependencies
+- allowed licenses
+- wildcard dependency declarations
+- dependency sources
+- duplicate dependency versions
 
 ## Security
 
-Please do **not** publicly disclose suspected vulnerabilities through normal GitHub issues.
+Security is a core project priority.
 
-Follow the private reporting process described in [SECURITY.md](SECURITY.md).
+Please do not publicly disclose suspected vulnerabilities through normal issues.
+
+See [SECURITY.md](SECURITY.md).
 
 ## Contributing
 
 Contributions are welcome.
 
-Lumrel uses a lightweight contribution process based on the Developer Certificate of Origin (DCO).
+Lumrel uses the Developer Certificate of Origin.
 
-By contributing, you certify that you have the right to submit your contribution under the project's license.
+See [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+Coding agents and AI-assisted contributors should also read:
+
+[AGENTS.md](AGENTS.md)
 
 ## Code of Conduct
 
-Participation in the Lumrel community is governed by [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+Participation in the project is governed by:
+
+[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
 
 ## License
 
-Lumrel source code is licensed under the **MIT License**, unless a specific file or directory explicitly states otherwise.
+Lumrel source code is licensed under the MIT License unless explicitly stated otherwise.
 
 See [LICENSE](LICENSE).
 
 ## Trademark
 
-The MIT License applies to the source code.
+The source code license does not grant unrestricted rights to Lumrel branding.
 
-It does **not** grant permission to use the Lumrel name, logo, or other project branding in a way that suggests an unofficial project, fork, product, or service is officially associated with Lumrel.
-
-Refer to [TRADEMARKS.md](TRADEMARKS.md) for details.
+See [TRADEMARKS.md](TRADEMARKS.md).

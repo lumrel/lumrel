@@ -2,157 +2,184 @@
 
 Security is a core design priority for Lumrel.
 
-Because Lumrel may provide foundational components for authentication, authorization, sessions, tokens, databases, and other backend infrastructure, security reports are taken seriously.
+Lumrel may provide foundational components for authentication, sessions, credentials, tokens, databases, mail, and other backend infrastructure.
+
+Security reports are therefore taken seriously.
 
 ## Reporting a Vulnerability
 
-Please **do not open a public GitHub issue** for suspected security vulnerabilities.
+Do not open a normal public GitHub issue for a suspected vulnerability.
 
-When GitHub Private Vulnerability Reporting is enabled for the repository, use it to submit the report privately.
+Use GitHub Private Vulnerability Reporting when it is available for the Lumrel repository.
 
-If private vulnerability reporting is unavailable, use the private security contact published by the Lumrel project or repository maintainers.
+If private vulnerability reporting is temporarily unavailable, contact the project maintainers through an appropriate private channel rather than publishing technical exploit details publicly.
 
-Do not include exploit details, credentials, secrets, personal information, or proof-of-concept attack code in a public issue.
+## Include
 
-## What to Include
+A useful security report should include, when possible:
 
-A useful security report should contain, when possible:
-
-- the affected crate
-- the affected version or commit
-- a description of the vulnerability
-- the expected behavior
-- the observed behavior
+- affected crate
+- affected version or commit
+- vulnerability description
+- expected behavior
+- observed behavior
 - reproduction steps
 - security impact
-- environmental requirements
+- required environment
 - relevant logs with secrets removed
-- a minimal proof of concept, when appropriate
-- suggested mitigations, if known
+- minimal proof of concept when appropriate
+- suggested mitigation when known
 
-Clear reports make investigation significantly easier.
+Do not include unrelated secrets, credentials, or personal information.
 
 ## Responsible Disclosure
 
-Please allow maintainers a reasonable opportunity to investigate and address a vulnerability before publishing technical details.
+Please allow maintainers a reasonable opportunity to investigate and release a fix before publishing exploitation details.
 
-The maintainers may coordinate disclosure timing with the reporter when a vulnerability affects released versions.
+When appropriate, maintainers may coordinate disclosure with the reporter.
 
-Once a fix is available, the project may publish:
+A published advisory may contain:
 
-- a security advisory
 - affected versions
 - fixed versions
-- upgrade instructions
-- mitigation guidance
-- appropriate technical details
+- upgrade guidance
+- mitigations
+- technical explanation
+- credits when desired by the reporter
 
 ## Supported Versions
 
-Lumrel is currently under active development.
+Lumrel is currently in early development.
 
-Until stable releases are established, security fixes may be provided primarily for the latest maintained release or development branch.
+Until stable release support policies are established, security fixes may target the most recent maintained release or development branch.
 
-Once the project reaches stable releases, this document will contain an explicit support matrix.
-
-A future support table may look like:
-
-| Version         | Supported                    |
-| --------------- | ---------------------------- |
-| Latest stable   | Yes                          |
-| Previous stable | Defined by support policy    |
-| Older releases  | No, unless explicitly stated |
-
-This table is illustrative until stable versioning begins.
+A formal support matrix will be published once stable release lines exist.
 
 ## Security Scope
 
-Security issues may include, but are not limited to:
+Examples of security issues include:
 
 - authentication bypass
 - authorization bypass
 - privilege escalation
-- session fixation
-- session hijacking
-- token validation flaws
-- insecure JWT handling
+- insecure credential handling
 - secret leakage
-- credential exposure
-- injection vulnerabilities
-- unsafe deserialization
-- cryptographic misuse
-- incorrect password handling
+- password handling flaws
+- session vulnerabilities
+- token validation flaws
 - rate-limit bypass
-- sensitive data exposure
-- dangerous default configuration
-- cross-tenant data access
-- memory-safety issues caused by unsafe code
+- unsafe deserialization
+- cross-tenant data exposure
+- dangerous defaults
+- cryptographic misuse
+- dependency vulnerabilities
+- unexpected unsafe code
+- information disclosure through errors or logs
 
-General bugs without security impact should be reported through the normal issue tracker.
+Normal correctness bugs without security impact should use the normal issue tracker.
+
+## Authentication Security
+
+Authentication code should distinguish:
+
+```text
+expected credential rejection
+```
+
+from:
+
+```text
+operational system failure
+```
+
+Authentication adapters should avoid exposing internal rejection distinctions to untrusted clients when doing so could facilitate account enumeration or related attacks.
+
+## Credentials and Secrets
+
+Secrets must not intentionally appear in:
+
+- logs
+- panic messages
+- `Debug` output
+- error strings
+- snapshots
+- telemetry
+- serialized public structures
+- test fixtures committed to the repository
+
+Credential types should avoid implementing `Debug`, `Clone`, or serialization unless the mechanism specifically requires and safely supports it.
 
 ## Cryptography
 
-Lumrel should not invent custom cryptographic primitives or protocols.
+Lumrel must not implement custom cryptographic primitives or protocols.
 
-Cryptographic functionality should rely on established implementations and recognized algorithms appropriate for the relevant use case.
-
-Security-sensitive cryptographic choices should be documented.
+Cryptographic functionality should use established, reviewed libraries and recognized algorithms appropriate for the specific mechanism.
 
 ## Unsafe Rust
 
-Use of `unsafe` code should be minimized.
+Core authentication crates forbid unsafe Rust.
 
-When `unsafe` is necessary, it should:
+If another future crate has a legitimate need for `unsafe`, the unsafe code must:
 
-- be narrowly scoped
-- document its safety assumptions
-- preserve Rust's required invariants
+- remain narrowly scoped
+- document its safety invariants
+- receive dedicated review
 - include appropriate tests
-- receive additional review
-
-Crates may adopt stricter `unsafe` policies where practical.
-
-## Secrets
-
-Lumrel should never intentionally log:
-
-- passwords
-- raw authentication tokens
-- private keys
-- API secrets
-- session secrets
-- database credentials
-
-Code handling secrets should minimize unnecessary copies and exposure where practical.
 
 ## Dependencies
 
-Dependency vulnerabilities are considered part of the Lumrel security surface.
+Dependency security is part of the Lumrel threat surface.
 
-The project may use automated tooling and dependency auditing to identify known vulnerabilities.
+The repository uses:
 
-Security-sensitive dependencies should be selected conservatively.
+```text
+cargo-deny
+```
 
-## Security Is a Shared Responsibility
+to check:
 
-Lumrel can provide secure primitives and defaults, but application security also depends on correct integration and deployment.
+- security advisories
+- yanked dependencies
+- licenses
+- dependency sources
+- wildcard declarations
+- duplicate versions
 
-Applications remain responsible for areas including:
+Dependency audit failures should be investigated rather than routinely ignored.
 
-- TLS configuration
-- secret management
-- infrastructure security
-- access controls
-- database configuration
-- deployment configuration
-- dependency updates
+## Serialization
+
+Deserialization must not bypass domain invariants.
+
+Invalid external data must not be capable of constructing invalid core domain values.
+
+Serde compatibility is treated as part of the public API where the feature is enabled.
+
+## Framework and Adapter Security
+
+Core crates cannot guarantee secure deployment by themselves.
+
+Applications and adapters remain responsible for areas such as:
+
+- TLS
+- HTTP security
+- cookies
+- CSRF protections
+- CORS
+- infrastructure access
+- secret storage
+- database security
+- provider configuration
+- deployment hardening
 - monitoring
 - incident response
 
-Lumrel documentation should make important integration requirements explicit rather than assuming secure deployment automatically.
+Documentation should make important integration requirements explicit.
 
-## Public Discussion After Disclosure
+## Security Is Shared
 
-After a vulnerability has been fixed and responsibly disclosed, technical discussion is welcome.
+Lumrel aims to provide secure primitives and safe defaults.
 
-Before coordinated disclosure is complete, please avoid publishing details that could enable exploitation of affected users.
+Using Lumrel does not automatically make an application secure.
+
+Application developers remain responsible for correct integration and deployment.

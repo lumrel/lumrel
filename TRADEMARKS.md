@@ -4,78 +4,66 @@
 
 Lumrel is open-source software.
 
-The source code is licensed under the MIT License, but the MIT License does not grant unrestricted rights to the Lumrel name, logos, visual identity, or other branding.
+The source code is licensed under the MIT License.
 
-This policy explains how Lumrel branding may be used.
+The MIT License does not grant unrestricted rights to the Lumrel name, logos, visual identity, or project branding.
 
-The goal is not to prevent legitimate discussion, compatibility statements, forks, or community activity.
-
-The goal is to prevent confusion about what is officially produced, maintained, approved, or endorsed by the Lumrel project.
+This policy exists to prevent confusion about what is officially produced, maintained, approved, sponsored, or endorsed by the Lumrel project.
 
 ## Covered Marks
 
-This policy applies to project branding including:
+This policy applies to:
 
 - the name **Lumrel**
 - official Lumrel logos
-- official icons
+- official Lumrel icons
 - distinctive project branding
-- other marks explicitly identified as official Lumrel branding
+- branding explicitly identified as official Lumrel branding
 
-Registration of a mark is not required for this policy to apply to project-controlled branding.
+## Software License and Brand Rights
 
-## Open Source License vs. Trademark Rights
+The MIT License allows broad use of Lumrel source code.
 
-The MIT License grants broad rights to use, modify, distribute, sublicense, and sell copies of Lumrel source code.
+It permits use, modification, distribution, sublicensing, and commercial use subject to its terms.
 
-Those permissions apply to the software.
+Those permissions apply to software.
 
-They do not automatically grant permission to represent a modified project, commercial product, service, fork, organization, or distribution as the official Lumrel project.
+They do not automatically grant permission to present a modified project, service, company, distribution, fork, or product as the official Lumrel project.
 
-You are free to fork the code.
+You may fork the code.
 
 You may need to rename the fork.
 
-## Uses That Are Generally Permitted
+## Generally Permitted Uses
 
-You may generally use the Lumrel name truthfully to:
+You may truthfully use the Lumrel name to:
 
-- refer to the Lumrel project
+- refer to the project
 - state that software uses Lumrel
-- state that software is compatible with Lumrel
-- link to the official Lumrel project
-- discuss Lumrel in articles, books, videos, presentations, or educational material
+- state compatibility with Lumrel
+- link to Lumrel
+- discuss Lumrel
+- publish tutorials or articles
 - compare Lumrel with other software
-- report news about Lumrel
-- describe a fork's origin
+- describe the origin of a fork
+- describe integration with Lumrel
 
 Examples:
 
 ```text
 Built with Lumrel
-```
-
-```text
 Compatible with Lumrel
+Based on Lumrel
+Unofficial Lumrel integration
 ```
 
-```text
-Originally based on Lumrel
-```
-
-```text
-An unofficial integration for Lumrel
-```
-
-Such statements must not imply official endorsement when none exists.
+Such statements must not falsely imply official endorsement.
 
 ## Forks
 
-You may fork, modify, and redistribute Lumrel source code according to its software license.
+Forking, modifying, and redistributing Lumrel source code is allowed according to the software license.
 
-A substantially modified fork should use a different primary name if using the Lumrel name would cause users to believe the fork is an official Lumrel release.
-
-It is acceptable to describe the relationship factually.
+A substantially modified fork should use a different primary name when continued use of the Lumrel name would create confusion.
 
 For example:
 
@@ -83,175 +71,142 @@ For example:
 ExampleProject — based on Lumrel
 ```
 
-is preferable to:
+is preferable for an independent fork to:
 
 ```text
 Lumrel Professional Edition
 ```
 
-for an unrelated third-party fork.
+when the latter is not an official Lumrel product.
 
-## Package Names
+## Crates and Packages
 
-Third-party packages, crates, plugins, adapters, or integrations may refer to Lumrel when necessary to communicate compatibility.
+Third-party crates and integrations may refer to Lumrel when necessary to communicate compatibility.
 
-Names should make third-party status clear.
+Names should clearly distinguish third-party packages from official Lumrel packages.
 
-For example, names such as:
+Official packages use the Lumrel namespace, such as:
 
 ```text
-acme-lumrel-adapter
+lumrel-auth
+lumrel-auth-password
 ```
 
-may be acceptable when they clearly identify the third-party project.
+Third parties should avoid package naming that falsely implies the package is maintained by the Lumrel organization.
 
-Names designed to appear official may not be acceptable.
+## Domains and Accounts
 
-Avoid names that imply the package is maintained by the Lumrel project unless it actually is.
+Do not register domains, package namespaces, social accounts, organizations, or similar identifiers designed to appear official when they are not.
 
-## Domains and Organizations
-
-Do not register domains, organizations, social-media accounts, package namespaces, or similar identifiers that are likely to be mistaken for official Lumrel infrastructure.
-
-Examples that may create confusion include identifiers presented as:
+Examples that could create confusion include:
 
 ```text
-official-lumrel
+lumrel-official
 lumrel-foundation
-lumrel-team
 lumrel-security
+lumrel-team
 ```
 
-when they are not operated by the official project.
+when not operated by the official project.
 
-Descriptive community identifiers should clearly indicate their unofficial status.
+Community resources should clearly indicate unofficial status when confusion is reasonably possible.
 
 ## Logos
 
 Official Lumrel logos may be used for truthful reference to the project.
 
-Do not use an official Lumrel logo as the primary branding of an unrelated product, company, service, or modified distribution.
+Do not use the Lumrel logo as the primary identity of:
 
-Do not modify the logo in a way that creates the impression of an official derivative product.
+- an unrelated company
+- an unrelated product
+- an independent fork
+- a commercial service
 
-Community artwork inspired by Lumrel should not be presented as official project branding.
+when doing so creates the impression that it is an official Lumrel offering.
 
 ## Commercial Use
 
-Commercial use of Lumrel source code is permitted by the software license.
+Commercial use of Lumrel source code is permitted under the software license.
 
-Commercial use of the Lumrel name is permitted when it truthfully describes compatibility or use of the project.
-
-For example:
-
-```text
-Hosting optimized for applications using Lumrel
-```
-
-may be appropriate.
-
-A third-party company should not market an unrelated or modified product as:
-
-```text
-Lumrel Cloud
-```
-
-or:
-
-```text
-Lumrel Enterprise
-```
-
-without permission when the name implies an official commercial product.
-
-## Services and Consulting
-
-Consultants, hosting providers, trainers, and other service providers may truthfully state that they provide services involving Lumrel.
+Commercial services may truthfully describe their relationship with Lumrel.
 
 For example:
 
 ```text
+Hosting for applications built with Lumrel
 Lumrel consulting
-```
-
-or:
-
-```text
 Support for Lumrel applications
 ```
 
-should be presented in a way that does not imply the provider is the Lumrel project itself.
+is generally acceptable when presented without implying official affiliation.
+
+Names such as:
+
+```text
+Lumrel Cloud
+Lumrel Enterprise
+```
+
+may imply an official product and should not be used by unrelated third parties without permission.
 
 ## Compatibility Statements
 
-Compatibility statements are encouraged when accurate.
+Accurate compatibility statements are encouraged.
 
 Examples:
 
 ```text
 Works with Lumrel
-```
-
-```text
 Adapter for Lumrel
-```
-
-```text
 Supports Lumrel authentication
 ```
 
-Avoid graphical presentation or wording that suggests certification, partnership, sponsorship, or endorsement unless such a relationship actually exists.
+Do not imply:
 
-## No Endorsement
+- certification
+- sponsorship
+- partnership
+- endorsement
 
-Use of Lumrel source code does not imply endorsement by the Lumrel project.
-
-Contributing to Lumrel does not automatically grant permission to represent another project or company as officially affiliated with Lumrel.
+unless such a relationship actually exists.
 
 ## Community Use
 
-Community groups, events, tutorials, and educational projects may refer to Lumrel.
+Community groups, educational resources, events, and tutorials may refer to Lumrel.
 
-When there is a meaningful possibility of confusion, include language such as:
+Where confusion is possible, use language such as:
 
 ```text
 Unofficial
-```
-
-or:
-
-```text
 Community-run
 ```
 
 ## Permission
 
-Uses outside this policy may be permitted with explicit approval from the appropriate Lumrel trademark or project owner.
+Uses outside this policy may be allowed with explicit approval from the appropriate Lumrel project or trademark owner.
 
-Permission should be obtained before launching branding that could reasonably appear official.
+Seek permission before launching branding that could reasonably be mistaken for an official Lumrel product.
 
 ## Enforcement
 
-The Lumrel project intends to prioritize preventing user confusion rather than restricting legitimate open-source activity.
+The goal of trademark enforcement is primarily to prevent user confusion, not to restrict legitimate open-source activity.
 
-When a use creates confusion, maintainers may first request reasonable changes such as:
+When confusion occurs, maintainers may request changes such as:
 
-- adding an unofficial designation
-- changing a product name
+- renaming a fork
 - changing a package name
+- adding an unofficial designation
 - removing an official logo
-- clarifying the relationship with Lumrel
+- clarifying the project's relationship to Lumrel
 
-Serious impersonation, fraud, or deliberately misleading branding may require stronger action.
+Deliberate impersonation or fraud may require stronger action.
 
 ## No Transfer of Rights
 
 This policy does not transfer ownership of Lumrel branding.
 
-Except where explicitly permitted, all rights in the Lumrel name, logos, and official branding remain with their respective owners.
+All rights in official Lumrel branding remain with their respective owners except where explicitly granted.
 
-## Changes to This Policy
+## Changes
 
-This policy may be updated as the Lumrel project grows and its branding evolves.
-
-Changes should continue to balance open-source freedom with the need to protect users from confusion.
+This policy may evolve as Lumrel and its branding grow.
